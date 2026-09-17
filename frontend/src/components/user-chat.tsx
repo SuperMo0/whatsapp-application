@@ -56,7 +56,7 @@ export default function UserChat() {
             <div className='w-full flex justify-center py-4'>
                 <ClipLoader color='var(--sc-accent)' size={18} aria-label="Loading earlier messages" />
             </div>
-        ) : null,
+        ) : <div className="h-4 md:h-5" />,
         Footer: ListFooter,
     }), [isFetchingNextPage]);
 
@@ -181,8 +181,8 @@ export default function UserChat() {
                                     )}
                                     <div className={isNewSender && !isNewDay ? 'pt-2' : ''}>
                                         {message.senderId === authUser?.id
-                                            ? <MeBubble message={message} showTail={isRunEnd} animate={message.id === animatedId} />
-                                            : <FriendBubble message={message} showSender={isNewSender} showTail={isRunEnd} animate={message.id === animatedId} />
+                                            ? <MeBubble message={message} animate={message.id === animatedId} />
+                                            : <FriendBubble message={message} showSender={isNewSender} isRunEnd={isRunEnd} animate={message.id === animatedId} />
                                         }
                                     </div>
                                     <div className="h-0.5" />

@@ -310,51 +310,10 @@ button:focus-visible,
   border: 1px solid var(--sc-line);
 }
 
-@utility tail-in {
-  border-bottom-left-radius: 0.25rem;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: -9px;
-    bottom: -1px;
-    width: 9px;
-    height: 9px;
-    background-color: var(--sc-line);
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: -8px;
-    bottom: 0;
-    width: 8px;
-    height: 8px;
-    background-color: var(--sc-bubble-in);
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  }
-}
-
 @utility bubble-out {
   background-color: var(--sc-bubble-out);
   color: var(--sc-bubble-out-ink);
   border: 1px solid transparent;
-}
-
-@utility tail-out {
-  border-bottom-right-radius: 0.25rem;
-
-  &::after {
-    content: '';
-    position: absolute;
-    right: -8px;
-    bottom: 0;
-    width: 8px;
-    height: 8px;
-    background-color: var(--sc-bubble-out);
-    clip-path: polygon(0 0, 0 100%, 100% 100%);
-  }
 }
 
 @utility btn-solid {

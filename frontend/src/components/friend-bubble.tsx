@@ -7,11 +7,11 @@ import { cn } from '../utils/utils';
 type FriendBubbleProps = {
     message: Message;
     showSender?: boolean;
-    showTail?: boolean;
+    isRunEnd?: boolean;
     animate?: boolean;
 };
 
-export default function FriendBubble({ message, showSender = true, showTail = true, animate = false }: FriendBubbleProps) {
+export default function FriendBubble({ message, showSender = true, isRunEnd = true, animate = false }: FriendBubbleProps) {
     const { data: people } = useAllUsers();
     // todo: we can optimize this next line by either embedding the user in every message or passing the user as a prop and using a map.
     const friend = people?.find((user) => user.id === message.senderId) || { name: "Unknown", avatar: null };
@@ -21,11 +21,11 @@ export default function FriendBubble({ message, showSender = true, showTail = tr
         <div className={cn("flex justify-start gap-2", animate && "message-in")}>
             {isGlobal && (
                 <div className="w-7 shrink-0 self-end">
-                    {showTail && <Avatar name={friend.name} src={friend.avatar} size={28} />}
+                    {isRunEnd && <Avatar name={friend.name} src={friend.avatar} size={28} />}
                 </div>
             )}
 
-            <div className={cn('bubble-base bubble-in', showTail && 'tail-in')}>
+            <div className="bubble-base bubble-in">
                 {isGlobal && showSender && (
                     <p className="text-[0.8125rem] font-medium text-muted mb-0.5">{friend.name}</p>
                 )}
