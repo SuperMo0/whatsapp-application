@@ -1,20 +1,24 @@
 import { useState, useRef, useEffect, type ChangeEvent } from 'react';
-import { IoMdImage } from "react-icons/io";
 import { MdEmojiEmotions } from "react-icons/md";
-import EmojiPicker from 'emoji-picker-react';
+import { IoSend } from "react-icons/io5";
+import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
 import { toast } from 'react-toastify';
 import { cn } from '../utils/utils';
 import { useCreateNewMessage } from '../hooks/use-chat-mutations';
+import { useTheme } from '../theme/useTheme';
 
 type ChatInputProps = {
     onSend?: () => void;
     chatId: string | null;
 };
+
 export default function ChatInput({ onSend, chatId }: ChatInputProps) {
     const [text, setText] = useState("");
     const [showEmoji, setShowEmoji] = useState(false);
     const { mutate: sendMessage } = useCreateNewMessage();
+    const { dark } = useTheme();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const emojiButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -23,88 +27,98 @@ export default function ChatInput({ onSend, chatId }: ChatInputProps) {
         }
     }, [text]);
 
-    async function handleSendMessage(e: ChangeEvent<HTMLFormElement>) {
+    useEffect(() => {
+        if (!showEmoji) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setShowEmoji(false);
+                emojiButtonRef.current?.focus();
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [showEmoji]);
+
+    async function handleSendMessage(e?: ChangeEvent<HTMLFormElement>) {
         if (e) e.preventDefault();
         const trimmedText = text.trim();
 
         if (!trimmedText || !chatId) return;
-
 
         setText("");
         setShowEmoji(false);
         if (onSend) onSend();
         sendMessage({ chatId, messageData: { content: trimmedText } }, {
             onError: () => {
-                toast.error('Failed to send message. Please try again.');
+                toast.error('Message not sent. Check your connection and try again.');
                 setText(trimmedText);
             }
         });
-
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            handleSendMessage(e as unknown as ChangeEvent<HTMLFormElement>);
+            handleSendMessage();
         }
     };
 
+    const canSend = text.trim().length > 0;
+
     return (
-        <div className="relative p-2 md:p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-t border-slate-200 dark:border-slate-800">
+        <div className="relative shrink-0 bg-surface border-t border-line">
             {showEmoji && (
-                <div className='absolute bottom-full mb-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300'>
-                    <div className="fixed inset-0" onClick={() => setShowEmoji(false)} />
-                    <div className="relative shadow-2xl rounded-2xl overflow-hidden">
+                <>
+                    <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowEmoji(false)}
+                        aria-hidden="true"
+                    />
+                    <div className='absolute bottom-full left-2 mb-2 z-50'>
                         <EmojiPicker
+                            theme={dark ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                            lazyLoadEmojis
                             onEmojiClick={(e) => setText(prev => prev + e.emoji)}
                         />
                     </div>
-                </div>
+                </>
             )}
 
-            <form onSubmit={handleSendMessage} className="flex flex-col gap-2">
-                <div className='group bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-transparent focus-within:border-blue/30 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all duration-300 shadow-inner'>
-                    <textarea
-                        ref={textareaRef}
-                        rows={1}
-                        value={text}
-                        onKeyDown={handleKeyDown}
-                        onChange={(e) => setText(e.target.value)}
-                        className="textarea textarea-ghost w-full resize-none focus:outline-0 bg-transparent py-3 px-4 text-sm leading-relaxed"
-                        placeholder="Type a message..."
-                    />
+            <form onSubmit={handleSendMessage} className="flex items-end gap-2 p-2 md:p-3">
+                <button
+                    ref={emojiButtonRef}
+                    type="button"
+                    onClick={() => setShowEmoji(v => !v)}
+                    aria-label={showEmoji ? "Close emoji picker" : "Open emoji picker"}
+                    aria-expanded={showEmoji}
+                    className={cn(
+                        "shrink-0 p-2 rounded-lg transition-colors",
+                        showEmoji ? "bg-accent-soft text-accent" : "text-muted hover:text-ink hover:bg-surface-2"
+                    )}
+                >
+                    <MdEmojiEmotions className='text-xl' aria-hidden="true" />
+                </button>
 
-                    <div className='flex items-center gap-3 px-3 pb-2'>
-                        <button
-                            type="button"
-                            onClick={() => toast.info('Image sharing is coming soon!')}
-                            className="p-1.5 rounded-lg hover:bg-blue/10 text-slate-400 hover:text-blue transition-colors"
-                        >
-                            <IoMdImage className='text-2xl' />
-                        </button>
+                <label htmlFor="message-input" className="sr-only">Message</label>
+                <textarea
+                    id="message-input"
+                    ref={textareaRef}
+                    rows={1}
+                    value={text}
+                    onKeyDown={handleKeyDown}
+                    onChange={(e) => setText(e.target.value)}
+                    className="field flex-1 resize-none max-h-[150px] py-2"
+                    placeholder="Type a message"
+                />
 
-                        <button
-                            type="button"
-                            onClick={() => setShowEmoji(!showEmoji)}
-                            className={cn(
-                                "p-1.5 rounded-lg transition-all",
-                                showEmoji ? "bg-blue/10 text-blue" : "hover:bg-blue/10 text-slate-400 hover:text-blue"
-                            )}
-                        >
-                            <MdEmojiEmotions className='text-2xl' />
-                        </button>
-
-                        <button
-                            disabled={!text.trim()}
-                            className={cn(
-                                "btn btn-sm h-10 px-6 ml-auto rounded-xl border-0 text-white font-bold transition-all active:scale-95 btn-glow",
-                                text.trim() ? "bg-blue hover:bg-blue-600" : "bg-slate-300 dark:bg-slate-700 opacity-50"
-                            )}
-                        >
-                            Send
-                        </button>
-                    </div>
-                </div>
+                <button
+                    type="submit"
+                    disabled={!canSend}
+                    aria-label="Send message"
+                    className="btn-solid shrink-0 w-10 h-10 rounded-full"
+                >
+                    <IoSend className='text-base' aria-hidden="true" />
+                </button>
             </form>
         </div>
     );

@@ -1,8 +1,7 @@
 import { useChatStore } from '../stores/chat.store.ts'
 import { MdKeyboardArrowLeft } from "react-icons/md";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-import { cn } from '../utils/utils.ts';
 import { useCheckSession } from '../hooks/use-auth-queries.ts';
+import Avatar from './ui/avatar.tsx';
 
 export default function UserChatHeader() {
     const { setSelectedChat, selectedChat, onlineUsers } = useChatStore();
@@ -15,40 +14,35 @@ export default function UserChatHeader() {
 
     const isOnline = isGlobalChat ? true : (selectedFriend ? onlineUsers.includes(selectedFriend.id) : false);
 
-    const displayName = isGlobalChat ? "Global Public Chat" : selectedFriend?.name;
-    const displayAvatar = isGlobalChat ? "https://thumbs.dreamstime.com/b/global-people-network-connection-blue-earth-ai-generated-user-icons-connected-around-glowing-globe-represents-419468051.jpg" : selectedFriend?.avatar;
-    const displayStatus = isGlobalChat ? "Always Live" : (isOnline ? "Active Now" : "Offline");
+    const displayName = isGlobalChat ? "Global Community" : (selectedFriend?.name ?? "Unknown");
+    const displayStatus = isGlobalChat ? "Open to everyone" : (isOnline ? "Online" : "Offline");
 
     return (
-        <div className='flex gap-3 items-center p-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm'>
+        <header className='shrink-0 flex gap-3 items-center px-3 md:px-4 h-14 bg-surface border-b border-line'>
             <button
+                type="button"
                 onClick={() => setSelectedChat(null)}
-                className='md:hidden p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors'
+                aria-label="Back to conversations"
+                className='md:hidden -ml-1 p-1 rounded-lg text-muted hover:text-ink hover:bg-surface-2 transition-colors'
             >
-                <MdKeyboardArrowLeft className='text-3xl text-slate-500' />
+                <MdKeyboardArrowLeft className='text-2xl' aria-hidden="true" />
             </button>
 
-            <div className={cn('avatar', isGlobalChat ? '' : (isOnline ? 'avatar-online' : 'avatar-offline'))}>
-                <div className="w-12 h-12 rounded-full ring-2 ring-slate-100 dark:ring-slate-800">
-                    <img src={displayAvatar || '/avatar.png'} draggable={false} alt="avatar" />
-                </div>
-            </div>
+            <Avatar
+                name={displayName}
+                src={selectedFriend?.avatar}
+                size={36}
+                variant={isGlobalChat ? 'global' : 'person'}
+            />
 
-            <div className="flex-1">
-                <p className='font-black text-lg text-slate-800 dark:text-white leading-none'>
+            <div className="flex-1 min-w-0">
+                <p className='font-medium text-[0.9375rem] text-ink truncate leading-tight'>
                     {displayName}
                 </p>
-                <span className={cn(
-                    'text-[10px] font-bold uppercase tracking-widest',
-                    isOnline ? 'text-green-500' : 'text-slate-400'
-                )}>
+                <p className='text-xs text-muted leading-tight'>
                     {displayStatus}
-                </span>
+                </p>
             </div>
-
-            <button className='p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors'>
-                <PiDotsThreeOutlineVerticalFill className='text-xl text-slate-400' />
-            </button>
-        </div>
+        </header>
     )
 }

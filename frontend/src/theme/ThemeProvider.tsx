@@ -10,12 +10,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
 
     useEffect(() => {
-        localStorage.setItem('theme', dark ? 'dark' : 'light');
-        if (dark) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        const theme = dark ? 'dark' : 'light';
+        localStorage.setItem('theme', theme);
+        document.documentElement.setAttribute('data-theme', theme);
     }, [dark]);
 
     const value = useMemo(

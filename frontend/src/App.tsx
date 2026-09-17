@@ -11,10 +11,8 @@ import { useTheme } from './theme/useTheme.js';
 import { useCheckSession } from './hooks/use-auth-queries.js'
 import LoadingScreen from './components/ui/loading-screen.js'
 
-
 function App() {
-
-  const { dark, toggleDark } = useTheme();
+  const { dark } = useTheme();
   const { data: authUser, isLoading } = useCheckSession();
 
   if (isLoading) {
@@ -22,21 +20,21 @@ function App() {
   }
 
   return (
-    <div
-      data-theme={dark ? "dark" : "light"}
-      className="min-h-screen transition-colors duration-500 ease-in-out"
-    >
+    <div className="min-h-dvh bg-app">
       <ToastContainer
         position="bottom-right"
         theme={dark ? "dark" : "light"}
-        toastClassName="rounded-2xl font-bold"
+        autoClose={4000}
+        hideProgressBar
+        newestOnTop
+        toastClassName="!rounded-lg !text-sm"
       />
 
       <Routes>
         <Route path='/' element={authUser ? <Home /> : <Navigate to="/login" replace />}>
           <Route index element={<Chats />} />
           <Route path='people' element={<People />} />
-          <Route path='profile' element={<Profile dark={dark} toggleDark={toggleDark} />} />
+          <Route path='profile' element={<Profile />} />
         </Route>
 
         <Route

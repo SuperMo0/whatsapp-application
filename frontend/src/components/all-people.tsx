@@ -3,35 +3,36 @@ import UsersList from './users-list'
 import { ClipLoader } from "react-spinners";
 import { useCheckSession } from '../hooks/use-auth-queries';
 import { useAllUsers, useUserFriends } from '../hooks/use-chat-queries';
+import { matchesQuery } from '../utils/utils';
 
-export default function AllPeople() {
+export default function AllPeople({ query = '' }: { query?: string }) {
     const { data: authUser } = useCheckSession();
     const { data: users, isLoading } = useAllUsers();
     const { data: friends } = useUserFriends();
 
     const filteredUsers = useMemo(() => {
         if (!users || !friends) return [];
-        return users.filter((u) => !friends.some(f => f.id === u.id) && authUser?.id !== u.id);
-    }, [users, friends, authUser?.id]);
+        return users.filter((u) =>
+            !friends.some(f => f.id === u.id) &&
+            authUser?.id !== u.id &&
+            matchesQuery(u.name, query)
+        );
+    }, [users, friends, authUser?.id, query]);
 
     if (isLoading) return (
-        <div className='flex flex-col items-center justify-center h-full gap-4 opacity-60'>
-            <ClipLoader color='#3b82f6' size={40} />
-            <p className="text-sm font-bold uppercase tracking-widest text-slate-500">Finding people...</p>
+        <div className='flex items-center justify-center h-full' role="status" aria-live="polite">
+            <ClipLoader color='var(--sc-accent)' size={24} aria-label="Finding people" />
         </div>
     );
 
-    if (filteredUsers.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center h-64 text-center p-8">
-                <p className="text-slate-500 font-medium">You've seen everyone! Check back later for new people.</p>
-            </div>
-        );
-    }
-
     return (
-        <div className="h-full overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <UsersList users={filteredUsers} />
-        </div>
+        <UsersList
+            users={filteredUsers}
+            emptyMessage={
+                query
+                    ? `No one matches “${query}”.`
+                    : "You've seen everyone. Check back when new people join."
+            }
+        />
     );
 }

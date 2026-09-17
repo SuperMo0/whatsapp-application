@@ -2,16 +2,26 @@ import type { SafeUser } from 'super-chat-shared/auth';
 import UserCard from './user-card';
 
 type UserListItem = {
-    users: SafeUser[]
+    users: SafeUser[];
+    emptyMessage?: string;
 }
-export default function UsersList({ users }: UserListItem) {
-    if (!users || users.length === 0) return null;
+
+export default function UsersList({ users, emptyMessage }: UserListItem) {
+    if (!users || users.length === 0) {
+        return (
+            <div className="flex items-center justify-center h-full px-8 text-center">
+                <p className="text-[0.9375rem] text-muted max-w-xs">
+                    {emptyMessage ?? 'Nobody here.'}
+                </p>
+            </div>
+        );
+    }
 
     return (
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 overflow-y-auto px-4 py-2 items-start max-h-full no-scrollbar animate-in fade-in duration-500'>
+        <ul className='h-full overflow-y-auto'>
             {users.map((user) => (
                 <UserCard key={user.id} user={user} />
             ))}
-        </div>
+        </ul>
     );
 }

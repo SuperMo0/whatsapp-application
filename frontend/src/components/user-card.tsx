@@ -5,6 +5,7 @@ import { useChatStore } from '../stores/chat.store';
 import { useNavigate } from 'react-router';
 import { cn } from '../utils/utils';
 import type { SafeUser } from 'super-chat-shared/auth';
+import Avatar from './ui/avatar';
 
 interface UserCardProps {
     user: SafeUser;
@@ -20,21 +21,23 @@ export default function UserCard({ user }: UserCardProps) {
     const { mutate: sendNewRequest } = useCreateFriendRequest();
     const { mutate: acceptRequest } = useAcceptFriendRequest();
 
-    const { setSelectedChat } = useChatStore();
+    const { setSelectedChat, onlineUsers } = useChatStore();
     const navigate = useNavigate();
 
     const isFriend = friends?.some(f => f.id === user.id);
     const incomingRequest = requestsToUser?.find(r => r.senderId === user.id);
     const hasSentRequest = requestsByUser?.some(r => r.receiverId === user.id);
+    const isOnline = onlineUsers.includes(user.id);
 
     let actionTitle = "Add";
-    let variant = "blue";
+    let actionLabel = `Send a friend request to ${user.name}`;
+    let isPrimary = true;
     let isActionDisabled = false;
     let onAction = () => sendNewRequest(user.id);
 
     if (isFriend) {
         actionTitle = "Message";
-        variant = "blue";
+        actionLabel = `Open your conversation with ${user.name}`;
         onAction = () => {
             const targetChat = chats?.find(c => c.id !== "1" && c.users.some(u => u.id === user.id));
             if (targetChat) {
@@ -44,57 +47,37 @@ export default function UserCard({ user }: UserCardProps) {
         };
     } else if (incomingRequest) {
         actionTitle = "Accept";
-        variant = "success";
+        actionLabel = `Accept the friend request from ${user.name}`;
         onAction = () => acceptRequest(incomingRequest.id);
     } else if (hasSentRequest) {
-        actionTitle = "Sent";
-        variant = "ghost";
+        actionTitle = "Requested";
+        actionLabel = `Friend request already sent to ${user.name}`;
+        isPrimary = false;
         isActionDisabled = true;
         onAction = () => { };
     }
 
     return (
-        <div
-            className="group card bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-sm rounded-3xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-        >
-            <figure className="px-4 pt-6">
-                <div className="relative">
-                    <img
-                        draggable={false}
-                        src={user.avatar || 'https://via.placeholder.com/150'} // Fallback for missing avatars
-                        alt={`${user.name}'s profile`}
-                        className="w-24 h-24 rounded-full object-cover shadow-inner ring-4 ring-transparent group-hover:ring-blue/30 transition-all duration-300"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=" + user.name + "&background=random";
-                        }}
-                    />
-                </div>
-            </figure>
+        <li className="flex items-center gap-3 px-4 py-2.5 border-b border-line bg-surface">
+            <Avatar name={user.name} src={user.avatar} size={40} online={isOnline} />
 
-            <div className="card-body items-center text-center p-4 gap-3">
-                <h2 className="card-title text-sm font-black truncate w-full justify-center text-slate-800 dark:text-slate-100">
-                    {user.name}
-                </h2>
-
-                <div className="card-actions w-full">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onAction();
-                        }}
-                        disabled={isActionDisabled}
-                        className={cn(
-                            "btn btn-sm w-full rounded-xl border-0 text-white font-bold transition-all active:scale-95",
-                            variant === 'blue' ? "bg-blue hover:bg-blue-600 shadow-lg shadow-blue/20" :
-                                variant === 'success' ? "bg-green-500 hover:bg-green-600" :
-                                    variant === 'ghost' ? "btn-ghost text-slate-400 bg-slate-100 dark:bg-slate-800" : "bg-blue",
-                            isActionDisabled ? "opacity-50 grayscale cursor-not-allowed" : ""
-                        )}
-                    >
-                        {actionTitle}
-                    </button>
-                </div>
+            <div className="flex-1 min-w-0">
+                <p className="font-medium text-[0.9375rem] text-ink truncate">{user.name}</p>
+                <p className="text-xs text-muted">{isOnline ? 'Online' : 'Offline'}</p>
             </div>
-        </div>
+
+            <button
+                type="button"
+                onClick={onAction}
+                disabled={isActionDisabled}
+                aria-label={actionLabel}
+                className={cn(
+                    "shrink-0 h-8 px-3.5 text-sm",
+                    isPrimary ? "btn-solid" : "btn-outline-quiet"
+                )}
+            >
+                {actionTitle}
+            </button>
+        </li>
     );
 }

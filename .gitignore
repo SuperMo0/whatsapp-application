@@ -31,3 +31,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+# Impeccable transient session artifacts
+frontend/.impeccable/questions/
+frontend/.impeccable/live/sessions/

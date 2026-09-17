@@ -5,10 +5,25 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/chat.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>chat</title>
+  <meta name="description" content="Super Chat — a real-time messaging app with friend requests, live presence and read receipts." />
+  <meta name="theme-color" content="#f4f2ef" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#12110f" media="(prefers-color-scheme: dark)" />
+  <title>Super Chat</title>
 </head>
 
 <body>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var dark = saved ? saved === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

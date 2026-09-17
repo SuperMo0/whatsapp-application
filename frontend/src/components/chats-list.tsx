@@ -5,58 +5,98 @@ import { useCheckSession } from '../hooks/use-auth-queries.ts';
 import { useUserChats } from '../hooks/use-chat-queries.ts';
 import { useMarkMessageAsRead } from '../hooks/use-chat-mutations.ts';
 import { ChatSkeleton } from './ui/chat-skeleton.tsx';
+import Avatar from './ui/avatar.tsx';
+import { listTime } from '../utils/Dates.util.js';
 
 export default function ChatsList() {
-    const { setSelectedChat, onlineUsers } = useChatStore();
+    const { setSelectedChat, selectedChat, onlineUsers } = useChatStore();
     const { data: authUser } = useCheckSession();
     const { data: chats, isLoading: isGettingChats } = useUserChats();
     const { mutate: markMessageAsRead } = useMarkMessageAsRead();
 
-
     if (isGettingChats) {
-        return <div className="p-2 space-y-2">{[1, 2, 3, 4, 5].map(i => <ChatSkeleton key={i} />)}</div>;
+        return (
+            <div className="h-full flex flex-col">
+                <header className="px-4 h-14 flex items-center border-b border-line">
+                    <h1 className="text-base font-semibold text-ink">Chats</h1>
+                </header>
+                <div className="p-2">{[1, 2, 3, 4, 5].map(i => <ChatSkeleton key={i} />)}</div>
+            </div>
+        );
     }
 
     if (!authUser) return null;
-    return (
-        <div className='h-full flex flex-col gap-1 p-2 overflow-y-auto no-scrollbar'>
-            <h2 className="px-3 py-2 text-xl font-black tracking-tight text-slate-800 dark:text-white">Messages</h2>
-            {chats?.map((chat: any) => {
-                const isGlobal = chat.id === "1";
-                const friend = isGlobal ? null : getFriend(authUser?.id, chat);
-                const lastMsg = chat.lastMessage;
-                const isUnread = lastMsg && lastMsg.senderId !== authUser?.id && !lastMsg.isRead;
 
-                return (
-                    <div
-                        key={chat.id}
-                        onClick={() => {
-                            if (isUnread) markMessageAsRead(lastMsg.id);
-                            setSelectedChat(chat);
-                        }}
-                        className={cn(
-                            'flex gap-3 items-center p-3 cursor-pointer rounded-2xl transition-all duration-200 group hover:bg-white dark:hover:bg-slate-800 shadow-hover',
-                            isUnread ? "bg-blue/5 dark:bg-blue/10" : "hover:shadow-md"
-                        )}
-                    >
-                        <div className={cn('avatar', isGlobal || onlineUsers.includes(friend!?.id) ? 'avatar-online' : 'avatar-offline')}>
-                            <div className="w-14 rounded-full ring-2 ring-transparent group-hover:ring-blue/30 transition-all">
-                                <img draggable={false} src={isGlobal ? "https://thumbs.dreamstime.com/b/global-people-network-connection-blue-earth-ai-generated-user-icons-connected-around-glowing-globe-represents-419468051.jpg" : (friend?.avatar || undefined)} alt="avatar" />
-                            </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-baseline">
-                                <p className="font-bold text-slate-800 dark:text-slate-100 truncate">{isGlobal ? "Global Community" : friend?.name}</p>
-                                {lastMsg && <span className="text-[10px] text-slate-400">{new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
-                            </div>
-                            <p className={cn("text-xs truncate", isUnread ? "text-blue font-bold" : "text-slate-500")}>
-                                {lastMsg ? lastMsg.content : "Start a conversation..."}
-                            </p>
-                        </div>
-                        {isUnread && <div className="w-2.5 h-2.5 bg-blue rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]" />}
-                    </div>
-                );
-            })}
+    return (
+        <div className='h-full flex flex-col'>
+            <header className="px-4 h-14 shrink-0 flex items-center border-b border-line">
+                <h1 className="text-base font-semibold text-ink">Chats</h1>
+            </header>
+
+            <ul className='flex-1 min-h-0 overflow-y-auto'>
+                {chats?.map((chat) => {
+                    const isGlobal = chat.id === "1";
+                    const friend = isGlobal ? null : getFriend(authUser.id, chat);
+                    const lastMsg = chat.lastMessage;
+                    const isUnread = !!lastMsg && lastMsg.senderId !== authUser.id && !lastMsg.isRead;
+                    const isActive = selectedChat?.id === chat.id;
+                    const name = isGlobal ? "Global Community" : (friend?.name ?? "Unknown");
+                    const isOnline = isGlobal ? true : !!friend && onlineUsers.includes(friend.id);
+
+                    return (
+                        <li key={chat.id}>
+                            <button
+                                type="button"
+                                aria-current={isActive ? 'true' : undefined}
+                                onClick={() => {
+                                    if (isUnread) markMessageAsRead(lastMsg.id);
+                                    setSelectedChat(chat);
+                                }}
+                                className={cn(
+                                    'w-full text-left flex gap-3 items-center px-4 py-2.5 border-b border-line transition-colors',
+                                    isActive ? 'bg-accent-soft' : 'hover:bg-surface-2'
+                                )}
+                            >
+                                <Avatar
+                                    name={name}
+                                    src={friend?.avatar}
+                                    size={44}
+                                    online={isGlobal ? undefined : isOnline}
+                                    variant={isGlobal ? 'global' : 'person'}
+                                />
+
+                                <span className="flex-1 min-w-0">
+                                    <span className="flex justify-between items-baseline gap-2">
+                                        <span className="font-medium text-[0.9375rem] text-ink truncate">{name}</span>
+                                        {lastMsg && (
+                                            <time
+                                                dateTime={new Date(lastMsg.timestamp).toISOString()}
+                                                className="text-[11px] text-muted tnum shrink-0"
+                                            >
+                                                {listTime(lastMsg.timestamp)}
+                                            </time>
+                                        )}
+                                    </span>
+                                    <span className="flex items-center gap-2 mt-0.5">
+                                        <span className={cn(
+                                            "text-[0.8125rem] truncate flex-1",
+                                            isUnread ? "text-ink font-medium" : "text-muted"
+                                        )}>
+                                            {lastMsg?.content ?? "No messages yet"}
+                                        </span>
+                                        {isUnread && (
+                                            <>
+                                                <span className="w-2 h-2 rounded-full bg-accent shrink-0" aria-hidden="true" />
+                                                <span className="sr-only">Unread</span>
+                                            </>
+                                        )}
+                                    </span>
+                                </span>
+                            </button>
+                        </li>
+                    );
+                })}
+            </ul>
         </div>
     );
 }

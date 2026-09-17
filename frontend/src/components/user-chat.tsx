@@ -9,6 +9,7 @@ import { useChatMessages } from '../hooks/use-chat-queries.ts';
 import { useMarkMessageAsRead } from '../hooks/use-chat-mutations.ts';
 import { ClipLoader } from 'react-spinners';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
+import { dayLabel } from '../utils/Dates.util.js';
 
 export default function UserChat() {
     const { selectedChat } = useChatStore();
@@ -53,45 +54,65 @@ export default function UserChat() {
     }, [selectedChat, authUser?.id, markMessageAsRead]);
 
     if (isLoading) return (
-        <div className='flex items-center justify-center h-full bg-transparent'>
-            <ClipLoader color='#3b82f6' size={40} />
+        <div className='flex items-center justify-center h-full chat-wall'>
+            <ClipLoader color='var(--sc-accent)' size={28} aria-label="Loading conversation" />
         </div>
     );
 
     if (!selectedChat) return null;
-    return (
-        <div className='h-full flex flex-col bg-white/10 dark:bg-slate-900/20 backdrop-blur-2xl border border-white/20 dark:border-white/5 shadow-2xl overflow-hidden rounded-4xl transition-all duration-500'>
-            <div className="z-10">
-                <UserChatHeader />
-            </div>
 
-            <div className='flex-1 overflow-hidden px-4 md:px-6 py-4'>
+    return (
+        <div className='h-full min-h-0 flex flex-col bg-app'>
+            <UserChatHeader />
+
+            <div className='flex-1 min-h-0 chat-wall'>
                 {messages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center opacity-30 text-center">
-                        <p className="text-xl font-black italic">Start of a new story...</p>
+                    <div className="h-full flex flex-col items-center justify-center text-center px-8">
+                        <p className="text-[0.9375rem] text-muted max-w-xs">
+                            No messages yet. Say hello to get the conversation started.
+                        </p>
                     </div>
                 ) : (
                     <Virtuoso
                         ref={virtuosoRef}
-                        className="h-full w-full no-scrollbar"
+                        className="h-full w-full"
                         data={messages}
                         firstItemIndex={firstItemIndex}
                         initialTopMostItemIndex={messages.length - 1}
                         startReached={loadMore}
                         followOutput={(isAtBottom) => (isAtBottom ? 'smooth' : false)}
                         alignToBottom
-                        itemContent={(index, message) => (
-                            <div className="pb-4">
-                                {message.senderId === authUser?.id
-                                    ? <MeBubble message={message} />
-                                    : <FriendBubble message={message} />
-                                }
-                            </div>
-                        )}
+                        itemContent={(index, message) => {
+                            const arrayIndex = index - firstItemIndex;
+                            const previous = arrayIndex > 0 ? messages[arrayIndex - 1] : undefined;
+
+                            const isNewDay = !previous ||
+                                new Date(previous.timestamp).toDateString() !== new Date(message.timestamp).toDateString();
+                            const isNewSender = !previous || previous.senderId !== message.senderId;
+
+                            return (
+                                <div className="px-3 md:px-6">
+                                    {isNewDay && (
+                                        <div className="flex justify-center py-3">
+                                            <span className="px-2.5 py-1 rounded-md bg-surface border border-line text-[11px] font-medium text-muted">
+                                                {dayLabel(message.timestamp)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className={isNewSender && !isNewDay ? 'pt-2' : ''}>
+                                        {message.senderId === authUser?.id
+                                            ? <MeBubble message={message} />
+                                            : <FriendBubble message={message} showSender={isNewSender} />
+                                        }
+                                    </div>
+                                    <div className="h-0.5" />
+                                </div>
+                            );
+                        }}
                         components={{
                             Header: () => isFetchingNextPage ? (
                                 <div className='w-full flex justify-center py-4'>
-                                    <ClipLoader color='#3b82f6' size={20} />
+                                    <ClipLoader color='var(--sc-accent)' size={18} aria-label="Loading earlier messages" />
                                 </div>
                             ) : null
                         }}
@@ -99,9 +120,7 @@ export default function UserChat() {
                 )}
             </div>
 
-            <div className='p-2 md:p-4 bg-white/5 dark:bg-black/5 backdrop-blur-md border-t border-white/10 dark:border-white/5'>
-                <ChatInput onSend={scrollToBottom} chatId={selectedChat.id} />
-            </div>
+            <ChatInput onSend={scrollToBottom} chatId={selectedChat.id} />
         </div>
     )
 }

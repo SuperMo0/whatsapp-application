@@ -8,22 +8,20 @@ export default function Chats() {
     const { selectedChat } = useChatStore();
 
     return (
-        <div className='flex flex-col md:grid md:grid-cols-[350px_1fr] lg:grid-cols-[400px_1fr] h-full overflow-hidden bg-white/30 dark:bg-slate-900/10 backdrop-blur-sm'>
-
+        <div className='h-full min-h-0 flex flex-col md:grid md:grid-cols-[320px_1fr] lg:grid-cols-[360px_1fr] overflow-hidden'>
             <div className={cn(
-                "h-full overflow-hidden border-r border-slate-200 dark:border-slate-800 transition-all duration-300",
+                "min-h-0 h-full overflow-hidden bg-surface md:border-r border-line",
                 selectedChat ? "hidden md:block" : "block"
             )}>
                 <ChatsList />
             </div>
 
             <div className={cn(
-                "h-full overflow-hidden transition-all duration-300",
+                "min-h-0 h-full overflow-hidden",
                 !selectedChat ? "hidden md:flex" : "flex flex-col"
             )}>
                 {selectedChat ? <UserChat /> : <ChatPlaceholder />}
             </div>
-
         </div>
     );
 }

@@ -1,38 +1,39 @@
 import type { Message } from 'super-chat-shared/chat';
-import { useCheckSession } from '../hooks/use-auth-queries.ts';
-import { fixDate } from '../utils/Dates.util.js';
+import { bubbleTime, fixDate } from '../utils/Dates.util.js';
 
 export default function MeBubble({ message }: { message: Message }) {
-    const { data: authUser } = useCheckSession();
     const isGlobal = message.chatId === "1";
+    const readLabel = message.isRead ? `Read ${fixDate(message.readAt!)}` : 'Delivered';
 
-    if (!authUser) return null;
     return (
-        <div className="chat chat-end animate-in fade-in slide-in-from-right-3 duration-300">
-            <div className="chat-image avatar">
-                <div className="w-10 rounded-full ring-2 ring-blue/20">
-                    <img
-                        alt="Your avatar"
-                        src={authUser.avatar || `https://ui-avatars.com/api/?name=${authUser.name}&background=random&color=fff&size=128`}
-                        draggable={false}
-                    />
-                </div>
+        <div className="flex justify-end message-in">
+            <div className="bubble-base bubble-out">
+                <p className="whitespace-pre-wrap">
+                    {message.content}
+                    <span className="bubble-meta text-[10px] tnum opacity-75">
+                        {bubbleTime(message.timestamp)}
+                        {!isGlobal && (
+                            <>
+                                <svg
+                                    viewBox="0 0 20 12"
+                                    className="w-4 h-3 shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.8"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                    style={{ opacity: message.isRead ? 1 : 0.65 }}
+                                >
+                                    <path d="M1.5 6.5 4.5 9.5 10.5 3" />
+                                    {message.isRead && <path d="M8.5 6.5 11.5 9.5 18 3" />}
+                                </svg>
+                                <span className="sr-only">{readLabel}</span>
+                            </>
+                        )}
+                    </span>
+                </p>
             </div>
-
-            <div className="chat-header mb-1 flex items-center gap-1.5">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">You</span>
-                <time className="text-[10px] opacity-40">{fixDate(message.timestamp)}</time>
-            </div>
-
-            <div className={"chat-bubble shadow-md text-white max-w-[85%] md:max-w-[70%] text-sm leading-relaxed bg-blue"}>
-                {message.content}
-            </div>
-
-            {!isGlobal && (
-                <div className="chat-footer py-1 text-[10px] font-bold opacity-50 uppercase tracking-tighter">
-                    {message.isRead ? `✓ Seen ${fixDate(message.readAt!)}` : '✓ Delivered'}
-                </div>
-            )}
         </div>
     )
 }

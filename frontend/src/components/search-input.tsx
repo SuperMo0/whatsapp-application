@@ -1,15 +1,24 @@
 import SearchIcon from '@mui/icons-material/Search';
 
-export default function SearchInput() {
+type SearchInputProps = {
+    value: string;
+    onChange: (value: string) => void;
+};
+
+export default function SearchInput({ value, onChange }: SearchInputProps) {
     return (
-        <div className="relative group w-full">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <SearchIcon className="text-slate-400 group-focus-within:text-blue transition-colors" />
-            </div>
+        <div className="relative w-full">
+            <label htmlFor="people-search" className="sr-only">Search people</label>
+            <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-faint">
+                <SearchIcon fontSize="small" aria-hidden="true" />
+            </span>
             <input
-                type="text"
-                placeholder="Search for friends or movies..."
-                className="w-full pl-12 pr-4 py-3 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue/50 focus:border-blue transition-all"
+                id="people-search"
+                type="search"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="Search people"
+                className="field pl-10"
             />
         </div>
     )
