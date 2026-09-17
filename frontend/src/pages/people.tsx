@@ -33,9 +33,10 @@ export default function People() {
                 </div>
 
                 <div className="flex px-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="People">
-                    <TabBtn isActive={tab === 'friends'} onClick={() => setTab('friends')} label="Friends" />
-                    <TabBtn isActive={tab === 'all people'} onClick={() => setTab('all people')} label="Discover" />
+                    <TabBtn id="friends" isActive={tab === 'friends'} onClick={() => setTab('friends')} label="Friends" />
+                    <TabBtn id="discover" isActive={tab === 'all people'} onClick={() => setTab('all people')} label="Discover" />
                     <TabBtn
+                        id="requests"
                         isActive={tab === 'requests'}
                         onClick={() => setTab('requests')}
                         label="Requests"
@@ -45,9 +46,21 @@ export default function People() {
             </header>
 
             <div className="flex-1 min-h-0 overflow-hidden">
-                {tab === "friends" && <Friends query={query} />}
-                {tab === "all people" && <AllPeople query={query} />}
-                {tab === "requests" && <Requests query={query} />}
+                {tab === "friends" && (
+                    <div role="tabpanel" id="panel-friends" aria-labelledby="tab-friends" className="h-full">
+                        <Friends query={query} />
+                    </div>
+                )}
+                {tab === "all people" && (
+                    <div role="tabpanel" id="panel-discover" aria-labelledby="tab-discover" className="h-full">
+                        <AllPeople query={query} />
+                    </div>
+                )}
+                {tab === "requests" && (
+                    <div role="tabpanel" id="panel-requests" aria-labelledby="tab-requests" className="h-full">
+                        <Requests query={query} />
+                    </div>
+                )}
             </div>
         </div>
     )

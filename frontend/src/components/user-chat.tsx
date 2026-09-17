@@ -1,11 +1,11 @@
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect, useState } from 'react'
 import { useChatStore } from '../stores/chat.store.ts'
 import UserChatHeader from './user-chat-header.jsx';
 import MeBubble from './me-bubble.jsx'
 import FriendBubble from './friend-bubble.jsx'
 import ChatInput from './chat-input.jsx';
 import { useCheckSession } from '../hooks/use-auth-queries.ts';
-import { useChatMessages } from '../hooks/use-chat-queries.ts';
+import { useChatMessages, useAllUsers } from '../hooks/use-chat-queries.ts';
 import { useMarkMessageAsRead } from '../hooks/use-chat-mutations.ts';
 import { ClipLoader } from 'react-spinners';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
@@ -14,8 +14,11 @@ import { dayLabel } from '../utils/Dates.util.js';
 export default function UserChat() {
     const { selectedChat } = useChatStore();
     const { data: authUser } = useCheckSession();
+    const { data: people } = useAllUsers();
     const { mutate: markMessageAsRead } = useMarkMessageAsRead();
     const virtuosoRef = useRef<VirtuosoHandle>(null);
+    const [announcement, setAnnouncement] = useState('');
+    const announcedRef = useRef<string | null>(null);
 
     const {
         data,
@@ -53,6 +56,28 @@ export default function UserChat() {
         }
     }, [selectedChat, authUser?.id, markMessageAsRead]);
 
+    useEffect(() => {
+        const latest = messages[messages.length - 1];
+        if (!latest) return;
+
+        if (announcedRef.current === null) {
+            announcedRef.current = latest.id;
+            return;
+        }
+        if (announcedRef.current === latest.id) return;
+
+        announcedRef.current = latest.id;
+        if (latest.senderId === authUser?.id) return;
+
+        const sender = people?.find(u => u.id === latest.senderId)?.name ?? 'Someone';
+        setAnnouncement(`${sender}: ${latest.content ?? ''}`);
+    }, [messages, authUser?.id, people]);
+
+    useEffect(() => {
+        announcedRef.current = null;
+        setAnnouncement('');
+    }, [selectedChat?.id]);
+
     if (isLoading) return (
         <div className='flex items-center justify-center h-full chat-wall'>
             <ClipLoader color='var(--sc-accent)' size={28} aria-label="Loading conversation" />
@@ -86,12 +111,17 @@ export default function UserChat() {
                             const arrayIndex = index - firstItemIndex;
                             const previous = arrayIndex > 0 ? messages[arrayIndex - 1] : undefined;
 
+                            const next = messages[arrayIndex + 1];
+
                             const isNewDay = !previous ||
                                 new Date(previous.timestamp).toDateString() !== new Date(message.timestamp).toDateString();
                             const isNewSender = !previous || previous.senderId !== message.senderId;
+                            const isNextDay = next &&
+                                new Date(next.timestamp).toDateString() !== new Date(message.timestamp).toDateString();
+                            const isRunEnd = !next || next.senderId !== message.senderId || !!isNextDay;
 
                             return (
-                                <div className="px-3 md:px-6">
+                                <div className="px-3 md:px-6 mx-auto w-full max-w-[56rem]">
                                     {isNewDay && (
                                         <div className="flex justify-center py-3">
                                             <span className="px-2.5 py-1 rounded-md bg-surface border border-line text-[11px] font-medium text-muted">
@@ -101,8 +131,8 @@ export default function UserChat() {
                                     )}
                                     <div className={isNewSender && !isNewDay ? 'pt-2' : ''}>
                                         {message.senderId === authUser?.id
-                                            ? <MeBubble message={message} />
-                                            : <FriendBubble message={message} showSender={isNewSender} />
+                                            ? <MeBubble message={message} showTail={isRunEnd} />
+                                            : <FriendBubble message={message} showSender={isNewSender} showTail={isRunEnd} />
                                         }
                                     </div>
                                     <div className="h-0.5" />
@@ -119,6 +149,10 @@ export default function UserChat() {
                     />
                 )}
             </div>
+
+            <p role="log" aria-live="polite" aria-atomic="true" className="sr-only">
+                {announcement}
+            </p>
 
             <ChatInput onSend={scrollToBottom} chatId={selectedChat.id} />
         </div>

@@ -23,11 +23,13 @@
   --sc-accent-ink: #ffffff;
 
   --sc-field-bg: #ffffff;
+  --sc-placeholder: #6f6a62;
 
   --sc-bubble-in: #ffffff;
   --sc-bubble-in-ink: #1b1a18;
   --sc-bubble-out: #0f6f6c;
   --sc-bubble-out-ink: #ffffff;
+  --sc-bubble-out-meta: #d8ebe8;
 
   --sc-danger: #a8332a;
   --sc-danger-soft: #fbeceb;
@@ -58,11 +60,13 @@
   --sc-accent-ink: #0c211f;
 
   --sc-field-bg: #2a2724;
+  --sc-placeholder: #a8a299;
 
   --sc-bubble-in: #232120;
   --sc-bubble-in-ink: #edeae4;
   --sc-bubble-out: #1e4b47;
   --sc-bubble-out-ink: #e8f3f1;
+  --sc-bubble-out-meta: #d8ebe8;
 
   --sc-danger: #e8837a;
   --sc-danger-soft: #2a1a18;
@@ -89,6 +93,7 @@
   --color-danger: var(--sc-danger);
   --color-danger-soft: var(--sc-danger-soft);
   --color-online: var(--sc-online);
+  --color-bubble-out-meta: var(--sc-bubble-out-meta);
 
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", sans-serif;
@@ -189,7 +194,10 @@ body {
   caret-color: var(--sc-accent);
 }
 
-:where(a, button, [tabindex]):focus-visible {
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible,
+[role="tab"]:focus-visible {
   outline: 2px solid var(--sc-accent);
   outline-offset: 2px;
   border-radius: 4px;
@@ -267,14 +275,53 @@ body {
   background-color: var(--sc-bubble-in);
   color: var(--sc-bubble-in-ink);
   border: 1px solid var(--sc-line);
-  border-top-left-radius: 0.25rem;
+}
+
+@utility tail-in {
+  border-bottom-left-radius: 0.25rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    bottom: -1px;
+    width: 9px;
+    height: 9px;
+    background-color: var(--sc-line);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -8px;
+    bottom: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--sc-bubble-in);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  }
 }
 
 @utility bubble-out {
   background-color: var(--sc-bubble-out);
   color: var(--sc-bubble-out-ink);
   border: 1px solid transparent;
-  border-top-right-radius: 0.25rem;
+}
+
+@utility tail-out {
+  border-bottom-right-radius: 0.25rem;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    bottom: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--sc-bubble-out);
+    clip-path: polygon(0 0, 0 100%, 100% 100%);
+  }
 }
 
 @utility btn-solid {
@@ -295,9 +342,9 @@ body {
   }
 
   &:disabled {
-    background-color: var(--sc-line-strong);
+    background-color: transparent;
     border-color: var(--sc-line-strong);
-    color: var(--sc-surface);
+    color: var(--sc-text-2);
     cursor: not-allowed;
   }
 }
@@ -336,7 +383,7 @@ body {
   transition: border-color 120ms linear;
 
   &::placeholder {
-    color: var(--sc-text-3);
+    color: var(--sc-placeholder);
   }
 
   &:hover:not(:disabled):not(:focus) {

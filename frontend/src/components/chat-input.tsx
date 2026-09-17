@@ -84,7 +84,7 @@ export default function ChatInput({ onSend, chatId }: ChatInputProps) {
                 </>
             )}
 
-            <form onSubmit={handleSendMessage} className="flex items-end gap-2 p-2 md:p-3">
+            <form onSubmit={handleSendMessage} className="flex items-end gap-2 p-2 md:p-3 mx-auto w-full max-w-[56rem]">
                 <button
                     ref={emojiButtonRef}
                     type="button"

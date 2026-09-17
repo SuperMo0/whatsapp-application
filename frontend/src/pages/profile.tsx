@@ -19,16 +19,48 @@ export default function Profile() {
     const [isSaving, setIsSaving] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const cropperCloseRef = useRef<HTMLButtonElement>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const photoButtonRef = useRef<HTMLButtonElement>(null);
+    const wasModalOpen = useRef(false);
 
     useEffect(() => {
         if (authUser) setName(authUser.name);
     }, [authUser]);
 
     useEffect(() => {
-        if (!modal) return;
+        if (!modal) {
+            if (wasModalOpen.current) {
+                wasModalOpen.current = false;
+                photoButtonRef.current?.focus();
+            }
+            return;
+        }
+        wasModalOpen.current = true;
+
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setModal(false);
+            if (e.key === 'Escape') {
+                setModal(false);
+                return;
+            }
+            if (e.key !== 'Tab') return;
+
+            const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            if (!focusables || focusables.length === 0) return;
+
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         };
+
         document.addEventListener('keydown', onKey);
         cropperCloseRef.current?.focus();
         return () => document.removeEventListener('keydown', onKey);
@@ -90,7 +122,7 @@ export default function Profile() {
                     aria-modal="true"
                     aria-label="Crop your photo"
                 >
-                    <div className="w-full max-w-lg bg-surface border border-line rounded-xl p-5">
+                    <div ref={dialogRef} className="w-full max-w-lg bg-surface border border-line rounded-xl p-5">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-sm font-semibold text-ink">Crop your photo</h2>
                             <button
@@ -113,6 +145,7 @@ export default function Profile() {
                         <div className='relative'>
                             <Avatar name={authUser.name} src={image || authUser.avatar} size={72} />
                             <button
+                                ref={photoButtonRef}
                                 type="button"
                                 onClick={() => inputRef.current?.click()}
                                 aria-label="Change profile photo"

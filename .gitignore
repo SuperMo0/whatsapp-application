@@ -34,3 +34,4 @@ dist-ssr
 # Impeccable transient session artifacts
 frontend/.impeccable/questions/
 frontend/.impeccable/live/sessions/
+PRODUCT.md

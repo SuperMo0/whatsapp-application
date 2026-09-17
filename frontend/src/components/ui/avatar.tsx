@@ -80,11 +80,14 @@ export default function Avatar({
             )}
 
             {online && (
-                <span
-                    className="absolute bottom-0 right-0 rounded-full bg-online ring-2 ring-surface"
-                    style={{ width: dot, height: dot }}
-                    title={`${name} is online`}
-                />
+                <>
+                    <span
+                        className="absolute bottom-0 right-0 rounded-full bg-online ring-2 ring-surface"
+                        style={{ width: dot, height: dot }}
+                        aria-hidden="true"
+                    />
+                    <span className="sr-only">Online</span>
+                </>
             )}
         </div>
     );
