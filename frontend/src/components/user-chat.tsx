@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useState } from 'react'
+import { useRef, useCallback, useEffect, useState, useMemo } from 'react'
 import { useChatStore } from '../stores/chat.store.ts'
 import UserChatHeader from './user-chat-header.jsx';
 import MeBubble from './me-bubble.jsx'
@@ -28,21 +28,58 @@ export default function UserChat() {
         isLoading
     } = useChatMessages(selectedChat?.id || "");
 
-    const messages = data?.pages.flatMap(page => page.messages).reverse() || [];
+    const messages = useMemo(
+        () => data?.pages.flatMap(page => page.messages).reverse() ?? [],
+        [data]
+    );
 
-    const firstItemIndex = 1000000 - messages.length;
+    // Only older pages prepend items. A newly sent or received message is
+    // appended, so it must not move this index or Virtuoso compensates the
+    // scroll position for a prepend that never happened.
+    const olderCount = useMemo(
+        () => data?.pages.slice(1).reduce((n, page) => n + page.messages.length, 0) ?? 0,
+        [data]
+    );
+    const firstItemIndex = 1000000 - olderCount;
     const loadMore = useCallback(() => {
         if (hasNextPage && !isFetchingNextPage) {
             fetchNextPage();
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    const scrollToBottom = () => {
-        virtuosoRef.current?.scrollToIndex({
-            index: 'LAST',
-            behavior: 'smooth'
-        });
-    };
+    const lastMessage = messages[messages.length - 1];
+    const previousLastId = useRef<string | null>(null);
+    const [animatedId, setAnimatedId] = useState<string | null>(null);
+
+    // One instant jump when my own message lands. Instant, because an animated
+    // scroll here would race followOutput and read as a bounce.
+    useEffect(() => {
+        if (!lastMessage) return;
+
+        const isNewArrival = previousLastId.current !== null
+            && previousLastId.current !== lastMessage.id;
+        previousLastId.current = lastMessage.id;
+
+        if (!isNewArrival) return;
+        setAnimatedId(lastMessage.id);
+
+        if (lastMessage.senderId === authUser?.id) {
+            virtuosoRef.current?.scrollToIndex({ index: 'LAST', behavior: 'auto' });
+        }
+    }, [lastMessage?.id, authUser?.id]);
+
+    // Drop the entrance class once it has played, so scrolling a message back
+    // into view does not replay it.
+    useEffect(() => {
+        if (!animatedId) return;
+        const timer = setTimeout(() => setAnimatedId(null), 400);
+        return () => clearTimeout(timer);
+    }, [animatedId]);
+
+    useEffect(() => {
+        previousLastId.current = null;
+        setAnimatedId(null);
+    }, [selectedChat?.id]);
 
     useEffect(() => {
         if (isLoading) return;
@@ -105,7 +142,7 @@ export default function UserChat() {
                         firstItemIndex={firstItemIndex}
                         initialTopMostItemIndex={messages.length - 1}
                         startReached={loadMore}
-                        followOutput={(isAtBottom) => (isAtBottom ? 'smooth' : false)}
+                        followOutput={(isAtBottom) => (isAtBottom ? 'auto' : false)}
                         alignToBottom
                         itemContent={(index, message) => {
                             const arrayIndex = index - firstItemIndex;
@@ -131,8 +168,8 @@ export default function UserChat() {
                                     )}
                                     <div className={isNewSender && !isNewDay ? 'pt-2' : ''}>
                                         {message.senderId === authUser?.id
-                                            ? <MeBubble message={message} showTail={isRunEnd} />
-                                            : <FriendBubble message={message} showSender={isNewSender} showTail={isRunEnd} />
+                                            ? <MeBubble message={message} showTail={isRunEnd} animate={message.id === animatedId} />
+                                            : <FriendBubble message={message} showSender={isNewSender} showTail={isRunEnd} animate={message.id === animatedId} />
                                         }
                                     </div>
                                     <div className="h-0.5" />
@@ -154,7 +191,7 @@ export default function UserChat() {
                 {announcement}
             </p>
 
-            <ChatInput onSend={scrollToBottom} chatId={selectedChat.id} />
+            <ChatInput chatId={selectedChat.id} />
         </div>
     )
 }

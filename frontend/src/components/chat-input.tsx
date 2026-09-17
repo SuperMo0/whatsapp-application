@@ -8,11 +8,10 @@ import { useCreateNewMessage } from '../hooks/use-chat-mutations';
 import { useTheme } from '../theme/useTheme';
 
 type ChatInputProps = {
-    onSend?: () => void;
     chatId: string | null;
 };
 
-export default function ChatInput({ onSend, chatId }: ChatInputProps) {
+export default function ChatInput({ chatId }: ChatInputProps) {
     const [text, setText] = useState("");
     const [showEmoji, setShowEmoji] = useState(false);
     const { mutate: sendMessage } = useCreateNewMessage();
@@ -47,7 +46,6 @@ export default function ChatInput({ onSend, chatId }: ChatInputProps) {
 
         setText("");
         setShowEmoji(false);
-        if (onSend) onSend();
         sendMessage({ chatId, messageData: { content: trimmedText } }, {
             onError: () => {
                 toast.error('Message not sent. Check your connection and try again.');

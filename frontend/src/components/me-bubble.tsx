@@ -5,14 +5,15 @@ import { cn } from '../utils/utils';
 type MeBubbleProps = {
     message: Message;
     showTail?: boolean;
+    animate?: boolean;
 };
 
-export default function MeBubble({ message, showTail = true }: MeBubbleProps) {
+export default function MeBubble({ message, showTail = true, animate = false }: MeBubbleProps) {
     const isGlobal = message.chatId === "1";
     const readLabel = message.isRead ? `Read ${fixDate(message.readAt!)}` : 'Delivered';
 
     return (
-        <div className="flex justify-end message-in">
+        <div className={cn("flex justify-end", animate && "message-in")}>
             <div className={cn('bubble-base bubble-out', showTail && 'tail-out')}>
                 <p className="whitespace-pre-wrap">
                     {message.content}

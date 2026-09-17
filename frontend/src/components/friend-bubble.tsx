@@ -8,16 +8,17 @@ type FriendBubbleProps = {
     message: Message;
     showSender?: boolean;
     showTail?: boolean;
+    animate?: boolean;
 };
 
-export default function FriendBubble({ message, showSender = true, showTail = true }: FriendBubbleProps) {
+export default function FriendBubble({ message, showSender = true, showTail = true, animate = false }: FriendBubbleProps) {
     const { data: people } = useAllUsers();
     // todo: we can optimize this next line by either embedding the user in every message or passing the user as a prop and using a map.
     const friend = people?.find((user) => user.id === message.senderId) || { name: "Unknown", avatar: null };
     const isGlobal = message.chatId === "1";
 
     return (
-        <div className="flex justify-start gap-2 message-in">
+        <div className={cn("flex justify-start gap-2", animate && "message-in")}>
             {isGlobal && (
                 <div className="w-7 shrink-0 self-end">
                     {showTail && <Avatar name={friend.name} src={friend.avatar} size={28} />}
