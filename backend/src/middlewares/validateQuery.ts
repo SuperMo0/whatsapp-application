@@ -2,7 +2,7 @@ import type { ZodType } from "zod";
 import type { Request, Response, NextFunction } from "express";
 import z from 'zod';
 
-export function validateParams(querySchema: ZodType) {
+export function validateQuery(querySchema: ZodType) {
 
     type Query = z.infer<typeof querySchema>
     return (req: Request<unknown, unknown, unknown, Query>, res: Response, next: NextFunction) => {
