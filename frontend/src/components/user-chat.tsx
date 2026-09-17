@@ -11,6 +11,10 @@ import { ClipLoader } from 'react-spinners';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import { dayLabel } from '../utils/Dates.util.js';
 
+function ListFooter() {
+    return <div className="h-4 md:h-5" />;
+}
+
 export default function UserChat() {
     const { selectedChat } = useChatStore();
     const { data: authUser } = useCheckSession();
@@ -46,6 +50,15 @@ export default function UserChat() {
             fetchNextPage();
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const listComponents = useMemo(() => ({
+        Header: () => isFetchingNextPage ? (
+            <div className='w-full flex justify-center py-4'>
+                <ClipLoader color='var(--sc-accent)' size={18} aria-label="Loading earlier messages" />
+            </div>
+        ) : null,
+        Footer: ListFooter,
+    }), [isFetchingNextPage]);
 
     const lastMessage = messages[messages.length - 1];
     const previousLastId = useRef<string | null>(null);
@@ -176,13 +189,7 @@ export default function UserChat() {
                                 </div>
                             );
                         }}
-                        components={{
-                            Header: () => isFetchingNextPage ? (
-                                <div className='w-full flex justify-center py-4'>
-                                    <ClipLoader color='var(--sc-accent)' size={18} aria-label="Loading earlier messages" />
-                                </div>
-                            ) : null
-                        }}
+                        components={listComponents}
                     />
                 )}
             </div>
