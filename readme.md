@@ -19,9 +19,9 @@ Database:
 ![PostgreSQL](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 
 ![Project Demo](./project-images/video.gif)
-![ALT TEXT](./project-images/Image1.png)
-![ALT TEXT](./project-images/Image2.png)
-![ALT TEXT](./project-images/Image3.png)
-![ALT TEXT](./project-images/Image4.png)
-![ALT TEXT](./project-images/Image5.png)
+![ALT TEXT](./project-images/image1.png)
+![ALT TEXT](./project-images/image2.png)
+![ALT TEXT](./project-images/image3.png)
+![ALT TEXT](./project-images/image4.png)
+![ALT TEXT](./project-images/image5.png)
 
