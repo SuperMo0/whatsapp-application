@@ -6,6 +6,8 @@ import { useCheckSession } from '../hooks/use-auth-queries';
 import { useUserChats, useUserFriendsRequestsTo } from '../hooks/use-chat-queries';
 import { cn } from '../utils/utils';
 import ThemeToggle from './ui/theme-toggle';
+import { Logout } from '@mui/icons-material';
+import { useLogout } from '../hooks/use-auth-mutations';
 
 type NavItemProps = {
     to: string;
@@ -50,6 +52,7 @@ export default function Panel() {
     ).length || 0;
 
     const unreadRequests = requestsToUser?.length || 0;
+    const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
     return (
         <div className='flex flex-row md:flex-col gap-1 p-1.5 md:py-3 md:h-full'>
@@ -57,6 +60,17 @@ export default function Panel() {
             <NavItem to="/people" icon={MdPeopleAlt} label="People" badge={unreadRequests} />
             <NavItem to="/profile" icon={BiSolidUser} label="Profile" badge={0} />
             <ThemeToggle variant="rail" className="md:mt-auto" />
+
+            <button
+                type="button"
+                onClick={() => logout()}
+                disabled={isLoggingOut}
+                aria-label="Sign out"
+                className="flex flex-col items-center justify-center gap-1 w-full md:w-16 py-2 md:py-3 rounded-lg text-muted hover:text-danger hover:bg-surface-2 transition-colors disabled:opacity-60"
+            >
+                <Logout sx={{ fontSize: 22 }} aria-hidden="true" />
+                <span className="text-[10px] font-medium tracking-wide">Sign out</span>
+            </button>
         </div>
     );
 }

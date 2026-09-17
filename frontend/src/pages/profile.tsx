@@ -1,15 +1,14 @@
 import { useState, useRef, useEffect, type ChangeEvent } from 'react'
 import { useCheckSession } from '../hooks/use-auth-queries';
-import { useLogout, useUpdateProfile } from '../hooks/use-auth-mutations';
+import { useUpdateProfile } from '../hooks/use-auth-mutations';
 import Cropper from '../components/cropper';
 import { toast } from 'react-toastify';
 import { useUserFriends } from '../hooks/use-chat-queries';
-import { CameraAlt, Logout } from '@mui/icons-material';
+import { CameraAlt } from '@mui/icons-material';
 import Avatar from '../components/ui/avatar';
 
 export default function Profile() {
     const { data: authUser } = useCheckSession();
-    const { mutate: logout } = useLogout();
     const { mutateAsync: updateProfile } = useUpdateProfile();
     const { data: friends } = useUserFriends();
 
@@ -185,16 +184,6 @@ export default function Profile() {
                             className="btn-solid w-full h-11"
                         >
                             {isSaving ? 'Saving…' : 'Save changes'}
-                        </button>
-                    </div>
-
-                    <div className="pt-2">
-                        <button
-                            type="button"
-                            onClick={() => logout()}
-                            className="flex items-center gap-2 text-sm font-medium text-danger hover:underline underline-offset-2 transition-colors"
-                        >
-                            <Logout sx={{ fontSize: 16 }} aria-hidden="true" /> Sign out
                         </button>
                     </div>
                 </div>
