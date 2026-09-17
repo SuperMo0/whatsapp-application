@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { login, signup, logout } from '../api/auth.api';
+import { login, signup, guestLogin, logout } from '../api/auth.api';
 import { orchesterateProfileUpadate, type UpdateProfileBodyClient } from '../api/chat.api';
 
 export const useUpdateProfile = () => {
@@ -26,6 +26,16 @@ export const useSignup = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: signup,
+        onSuccess: (data) => {
+            queryClient.setQueryData(['auth', 'session'], data);
+        },
+    });
+};
+
+export const useGuestLogin = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: guestLogin,
         onSuccess: (data) => {
             queryClient.setQueryData(['auth', 'session'], data);
         },

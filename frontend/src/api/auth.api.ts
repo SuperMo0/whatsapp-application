@@ -1,6 +1,6 @@
 import client from '../lib/axios';
 import type { LoginBody, SignupBody } from 'super-chat-shared/auth';
-import type { GetCheckResponse, PostLoginResponse, PostSignupResponse } from 'super-chat-shared/api';
+import type { GetCheckResponse, PostGuestLoginResponse, PostLoginResponse, PostSignupResponse } from 'super-chat-shared/api';
 import { catchAsync } from '../utils/catch-async.util';
 
 
@@ -20,6 +20,12 @@ export const login = async (loginFromData: LoginBody) => {
 
 export const signup = async (signupFormData: SignupBody) => {
     const [error, data] = await catchAsync(client.post<PostSignupResponse>('/auth/signup', signupFormData));
+    if (error) throw error;
+    return data;
+}
+
+export const guestLogin = async () => {
+    const [error, data] = await catchAsync(client.post<PostGuestLoginResponse>('/auth/guest'));
     if (error) throw error;
     return data;
 }

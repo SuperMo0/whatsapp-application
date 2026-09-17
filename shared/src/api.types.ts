@@ -15,6 +15,12 @@ export const PostSignupResponseSchema = z.object({
 
 export type PostSignupResponse = z.infer<typeof PostSignupResponseSchema>
 
+export const PostGuestLoginResponseSchema = z.object({
+    user: safeUserSchema
+})
+
+export type PostGuestLoginResponse = z.infer<typeof PostGuestLoginResponseSchema>
+
 export const GetCheckResponseSchema = z.object({
     user: safeUserSchema.nullable()
 })

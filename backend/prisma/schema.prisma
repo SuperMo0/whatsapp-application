@@ -19,6 +19,7 @@ model user {
   name             String
   password         String
   avatar           String?
+  isGuest          Boolean   @default(false)
   friendsTo        user[]    @relation("UsertoUser")
   friendsBy        user[]    @relation("UsertoUser")
   chats            chat[]

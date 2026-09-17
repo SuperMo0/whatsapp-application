@@ -21,6 +21,14 @@ if (process.env.NODE_ENV === "development") {
     }))
 }
 
+const trustProxy = process.env.TRUST_PROXY;
+if (trustProxy) {
+    const hops = Number(trustProxy);
+    app.set('trust proxy', Number.isNaN(hops) ? trustProxy : hops);
+} else if (process.env.NODE_ENV === 'production') {
+    console.warn('TRUST_PROXY is not set. If this app runs behind a proxy, set it to the number of proxy hops so rate limiting keys on the real client IP.');
+}
+
 app.set('io', io);
 
 app.use(cookieParser());

@@ -4,11 +4,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type LoginBody, loginBodySchema } from "super-chat-shared/auth";
 import Input from "../components/ui/input";
-import { useLogin } from "./../hooks/use-auth-mutations";
+import { useLogin, useGuestLogin } from "./../hooks/use-auth-mutations";
+import GuestLoginButton from "../components/ui/guest-login-button";
 import { AxiosError } from "axios";
 export default function Login() {
 
     const login = useLogin();
+    const guestLogin = useGuestLogin();
 
     const { register, handleSubmit, formState, setError } = useForm({
         resolver: zodResolver(loginBodySchema)
@@ -21,6 +23,17 @@ export default function Login() {
                     const message = e.response?.data?.message || 'An error occurred during login.';
                     setError('root', { message });
                 }
+            }
+        });
+    }
+
+    function handleGuestLogin() {
+        guestLogin.mutate(undefined, {
+            onError: (e) => {
+                const message = e instanceof AxiosError
+                    ? e.response?.data?.message || 'Could not start a guest session.'
+                    : 'Could not start a guest session.';
+                setError('root', { message });
             }
         });
     }
@@ -61,10 +74,16 @@ export default function Login() {
                             <p className="text-red-500 text-xs">{formState.errors.password?.message}</p>
                         </div>
 
-                        <button disabled={login.isPending} className="btn bg-blue hover:bg-blue-600 border-0 text-white w-full rounded-xl h-12 btn-glow">
+                        <button disabled={login.isPending || guestLogin.isPending} className="btn bg-blue hover:bg-blue-600 border-0 text-white w-full rounded-xl h-12 btn-glow">
                             {login.isPending ? <ClipLoader size={20} color="white" /> : "Sign In"}
                         </button>
                     </form>
+
+                    <GuestLoginButton
+                        onClick={handleGuestLogin}
+                        isPending={guestLogin.isPending}
+                        disabled={login.isPending}
+                    />
 
                     <div className="mt-6 text-center">
                         <p className='text-sm text-slate-500'>
