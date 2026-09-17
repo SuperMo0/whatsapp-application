@@ -35,3 +35,7 @@ dist-ssr
 frontend/.impeccable/questions/
 frontend/.impeccable/live/sessions/
 PRODUCT.md
+
+# Test coverage
+coverage/
+*.lcov
