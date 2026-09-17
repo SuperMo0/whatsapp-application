@@ -249,6 +249,39 @@ button:focus-visible,
   background-size: 52px 52px;
 }
 
+@utility panel-divider {
+  position: relative;
+  width: 5px;
+  cursor: col-resize;
+  background-color: transparent;
+  touch-action: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 2px;
+    width: 1px;
+    background-color: var(--sc-line);
+    transition: background-color 120ms linear;
+  }
+
+  &:hover::before,
+  &[data-dragging='true']::before {
+    background-color: var(--sc-accent);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible::before {
+    background-color: var(--sc-accent);
+    box-shadow: 0 0 0 1px var(--sc-accent);
+  }
+}
+
 @utility bubble-base {
   position: relative;
   max-width: min(78%, 34rem);
