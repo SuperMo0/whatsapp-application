@@ -4,6 +4,7 @@ import { useChatStore } from '../stores/chat.store';
 import type { Message } from 'super-chat-shared/chat';
 import type { GetChatMessagesResponse } from 'super-chat-shared/api';
 import { useMarkMessageAsRead } from './use-chat-mutations';
+import { messageKey, withClientKey } from '../utils/chat.util';
 
 export const useGlobalSocketListeners = () => {
     const queryClient = useQueryClient();
@@ -22,7 +23,7 @@ export const useGlobalSocketListeners = () => {
                     pages: oldData.pages.map((page: GetChatMessagesResponse) => ({
                         ...page,
                         messages: page.messages.map((msg: Message) =>
-                            msg.id === updatedMessage.id ? updatedMessage : msg
+                            msg.id === updatedMessage.id ? withClientKey(updatedMessage, messageKey(msg)) : msg
                         )
                     }))
                 };

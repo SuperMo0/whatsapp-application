@@ -1,20 +1,23 @@
+import { memo } from 'react';
 import type { Message } from 'super-chat-shared/chat';
 import { bubbleTime } from '../utils/Dates.util.js';
-import { useAllUsers } from '../hooks/use-chat-queries';
 import Avatar from './ui/avatar';
 import { cn } from '../utils/utils';
 
+export type BubbleSender = {
+    name: string;
+    avatar: string | null;
+};
+
 type FriendBubbleProps = {
     message: Message;
+    sender: BubbleSender;
     showSender?: boolean;
     isRunEnd?: boolean;
     animate?: boolean;
 };
 
-export default function FriendBubble({ message, showSender = true, isRunEnd = true, animate = false }: FriendBubbleProps) {
-    const { data: people } = useAllUsers();
-    // todo: we can optimize this next line by either embedding the user in every message or passing the user as a prop and using a map.
-    const friend = people?.find((user) => user.id === message.senderId) || { name: "Unknown", avatar: null };
+function FriendBubble({ message, sender: friend, showSender = true, isRunEnd = true, animate = false }: FriendBubbleProps) {
     const isGlobal = message.chatId === "1";
 
     return (
@@ -40,3 +43,5 @@ export default function FriendBubble({ message, showSender = true, isRunEnd = tr
         </div>
     )
 }
+
+export default memo(FriendBubble);

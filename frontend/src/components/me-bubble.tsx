@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Message } from 'super-chat-shared/chat';
 import { bubbleTime, fixDate } from '../utils/Dates.util.js';
 import { cn } from '../utils/utils';
@@ -7,7 +8,7 @@ type MeBubbleProps = {
     animate?: boolean;
 };
 
-export default function MeBubble({ message, animate = false }: MeBubbleProps) {
+function MeBubble({ message, animate = false }: MeBubbleProps) {
     const isGlobal = message.chatId === "1";
     const readLabel = message.isRead ? `Read ${fixDate(message.readAt!)}` : 'Delivered';
 
@@ -42,3 +43,5 @@ export default function MeBubble({ message, animate = false }: MeBubbleProps) {
         </div>
     )
 }
+
+export default memo(MeBubble);

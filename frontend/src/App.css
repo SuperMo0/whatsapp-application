@@ -251,6 +251,15 @@ button:focus-visible,
   background-size: 52px 52px;
 }
 
+/* The message list scroller. Overscroll stays inside the list instead of
+   chaining to the page, and native scroll anchoring is off because the list
+   positions itself (see MessageList); two mechanisms adjusting the same
+   scroll position would fight. */
+@utility chat-scroller {
+  overscroll-behavior-y: contain;
+  overflow-anchor: none;
+}
+
 @utility panel-divider {
   position: relative;
   width: 5px;

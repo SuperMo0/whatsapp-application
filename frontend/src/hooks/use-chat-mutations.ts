@@ -7,6 +7,7 @@ import {
 } from '../api/chat.api';
 import type { Chat, Message, NewMessageBody } from 'super-chat-shared/chat';
 import { createOptimisticMessage } from '../utils/optimistic-factory.util';
+import { withClientKey } from '../utils/chat.util';
 import type { GetChatMessagesResponse, GetCheckResponse, GetUserChatsResponse } from 'super-chat-shared/api';
 
 export const useCreateFriendRequest = () => {
@@ -68,7 +69,9 @@ export const useCreateNewMessage = () => {
                 newPages[0] = {
                     ...newPages[0],
                     messages: newPages[0].messages.map((msg) =>
-                        msg.id === context?.optimisticMessageId ? data.message : msg
+                        msg.id === context?.optimisticMessageId
+                            ? withClientKey(data.message, context.optimisticMessageId)
+                            : msg
                     )
                 };
                 return {
