@@ -20,7 +20,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-dvh bg-app">
+    <div className="bg-app">
       <ToastContainer
         position="bottom-right"
         theme={dark ? "dark" : "light"}

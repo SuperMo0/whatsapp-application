@@ -27,7 +27,7 @@ export default function Home() {
     }
 
     return (
-        <div className="h-dvh flex flex-col md:flex-row bg-app overflow-hidden">
+        <div className="fixed inset-0 flex flex-col md:flex-row bg-app overflow-hidden overscroll-none">
             <nav
                 aria-label="Primary"
                 className="order-2 md:order-1 shrink-0 bg-surface border-t md:border-t-0 md:border-r border-line"

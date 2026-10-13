@@ -176,9 +176,11 @@
 
 html {
   background-color: var(--sc-app);
+  overscroll-behavior: none;
 }
 
 body {
+  overscroll-behavior: none;
   font-family: var(--font-sans);
   color: var(--sc-text);
   -webkit-font-smoothing: antialiased;
