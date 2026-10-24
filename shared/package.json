@@ -7,10 +7,10 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^26.5.1"
+    "@types/node": "^26.6.5"
   },
   "exports": {
     "./auth": "./src/auth.types.ts",
